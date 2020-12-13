@@ -67,7 +67,8 @@ class TetGen(object):
         self.node = None
         self.elem = None
         self._grid = None
-
+        self.elemattr = None
+        
         def parse_mesh(mesh):
             if not mesh.is_all_triangles:
                 raise RuntimeError('Invalid mesh.  Must be an all triangular mesh')
@@ -420,81 +421,86 @@ class TetGen(object):
         # Call libary
         plc = True  # always true
         try:
-            self.node, self.elem = _tetgen.Tetrahedralize(self.v,
-                                                          self.f,
-                                                          switches_str,
-                                                          plc,
-                                                          psc,
-                                                          refine,
-                                                          quality,
-                                                          nobisect,
-                                                          coarsen,
-                                                          metric,
-                                                          weighted,
-                                                          brio_hilbert,
-                                                          incrflip,
-                                                          flipinsert,
-                                                          varvolume,
-                                                          fixedvolume,
-                                                          noexact,
-                                                          nostaticfilter,
-                                                          insertaddpoints,
-                                                          regionattrib,
-                                                          cdtrefine,
-                                                          diagnose,
-                                                          convex,
-                                                          zeroindex,
-                                                          facesout,
-                                                          edgesout,
-                                                          neighout,
-                                                          voroout,
-                                                          meditview,
-                                                          vtkview,
-                                                          nobound,
-                                                          nonodewritten,
-                                                          noelewritten,
-                                                          nofacewritten,
-                                                          noiterationnum,
-                                                          nomergefacet,
-                                                          nomergevertex,
-                                                          nojettison,
-                                                          docheck,
-                                                          quiet,
-                                                          verbose,
-                                                          vertexperblock,
-                                                          tetrahedraperblock,
-                                                          shellfaceperblock,
-                                                          nobisect_nomerge,
-                                                          supsteiner_level,
-                                                          addsteiner_algo,
-                                                          coarsen_param,
-                                                          weighted_param,
-                                                          fliplinklevel,
-                                                          flipstarsize,
-                                                          fliplinklevelinc,
-                                                          reflevel,
-                                                          optscheme,
-                                                          optlevel,
-                                                          delmaxfliplevel,
-                                                          order,
-                                                          reversetetori,
-                                                          steinerleft,
-                                                          no_sort,
-                                                          hilbert_order,
-                                                          hilbert_limit,
-                                                          brio_threshold,
-                                                          brio_ratio,
-                                                          facet_separate_ang_tol,
-                                                          facet_overlap_ang_tol,
-                                                          facet_small_ang_tol,
-                                                          maxvolume,
-                                                          minratio,
-                                                          mindihedral,
-                                                          optmaxdihedral,
-                                                          optminsmtdihed,
-                                                          optminslidihed,
-                                                          epsilon,
-                                                          coarsen_percent)
+            
+            meshdata = _tetgen.Tetrahedralize(self.v,
+                                     self.f,
+                                     switches_str,
+                                     plc,
+                                     psc,
+                                     refine,
+                                     quality,
+                                     nobisect,
+                                     coarsen,
+                                     metric,
+                                     weighted,
+                                     brio_hilbert,
+                                     incrflip,
+                                     flipinsert,
+                                     varvolume,
+                                     fixedvolume,
+                                     noexact,
+                                     nostaticfilter,
+                                     insertaddpoints,
+                                     regionattrib,
+                                     cdtrefine,
+                                     diagnose,
+                                     convex,
+                                     zeroindex,
+                                     facesout,
+                                     edgesout,
+                                     neighout,
+                                     voroout,
+                                     meditview,
+                                     vtkview,
+                                     nobound,
+                                     nonodewritten,
+                                     noelewritten,
+                                     nofacewritten,
+                                     noiterationnum,
+                                     nomergefacet,
+                                     nomergevertex,
+                                     nojettison,
+                                     docheck,
+                                     quiet,
+                                     verbose,
+                                     vertexperblock,
+                                     tetrahedraperblock,
+                                     shellfaceperblock,
+                                     nobisect_nomerge,
+                                     supsteiner_level,
+                                     addsteiner_algo,
+                                     coarsen_param,
+                                     weighted_param,
+                                     fliplinklevel,
+                                     flipstarsize,
+                                     fliplinklevelinc,
+                                     reflevel,
+                                     optscheme,
+                                     optlevel,
+                                     delmaxfliplevel,
+                                     order,
+                                     reversetetori,
+                                     steinerleft,
+                                     no_sort,
+                                     hilbert_order,
+                                     hilbert_limit,
+                                     brio_threshold,
+                                     brio_ratio,
+                                     facet_separate_ang_tol,
+                                     facet_overlap_ang_tol,
+                                     facet_small_ang_tol,
+                                     maxvolume,
+                                     minratio,
+                                     mindihedral,
+                                     optmaxdihedral,
+                                     optminsmtdihed,
+                                     optminslidihed,
+                                     epsilon,
+                                     coarsen_percent)
+            if regionattrib:
+                self.node, self.elem, self.elemattr = meshdata
+            else:
+                self.node, self.elem = meshdata
         except RuntimeError as e:
             raise RuntimeError('Failed to tetrahedralize.\n' +
                                'May need to repair surface by making it manifold:\n' +
@@ -510,7 +516,10 @@ class TetGen(object):
                  self.elem.shape[0])
         self._updated = True
 
-        return self.node, self.elem
+        if regionattrib:
+            return self.node, self.elem, self.elemattr
+        else:
+            return self.node, self.elem
 
     @property
     def grid(self):

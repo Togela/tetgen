@@ -106,3 +106,13 @@ def functional_tet_example():
         plotter.add_mesh(single_cell)
         plotter.update()
     plotter.close()
+
+def test_nested_spheres():
+    spherebig = pv.Sphere(1, (0,0,0))
+    spheresmall = pv.Sphere(0.5, (0,0,0))
+    allspheres = spherebig.boolean_add(spheresmall)
+    v = allspheres.points
+    f = allspheres.faces.reshape(-1, 4)[:, 1:]
+    tet = tetgen.TetGen(v, f)
+    nodes, elems, elemattrs = tet.tetrahedralize(regionattrib=1)
+    return nodes, elems, elemattrs
