@@ -22,6 +22,7 @@ dist/
 
 # MISC
 *.bat
+.vscode
 
 # Testing
 factory/
@@ -34,3 +35,4 @@ test.sh
 docs/errors.txt
 docs/_build
 docs/examples
+
